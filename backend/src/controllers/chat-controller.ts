@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import User from "../models/user-model.js";
-import { configureOpenai } from "../config/openai-config.js";
-import { ChatCompletionRequestMessage, OpenAIApi } from "openai";
+import OpenAI from "openai";
 
 export const generateChat = async (
   req: Request,
@@ -21,25 +20,30 @@ export const generateChat = async (
     const chats = user.chats.map(({ role, content }) => ({
       role,
       content,
-    })) as ChatCompletionRequestMessage[];
+    }));
     chats.push({ role: "user", content: message });
     user.chats.push({ role: "user", content: message });
 
     //send all chats with new chat to open ai
-    const config = configureOpenai();
-    const openai = new OpenAIApi(config);
-    const chatResponse = await openai.createChatCompletion({
+    const client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+    const chatResponse = await client.chat.completions.create({
       model: "gpt-3.5-turbo",
-      messages: chats,
+      messages: [{ role: "user", content: message }],
     });
 
     //grab new response
 
-    user.chats.push(chatResponse.data.choices[0].message);
+    user.chats.push({
+      role: "assistant",
+      content: chatResponse.choices[0].message.content,
+    });
     await user.save();
 
     return res.status(200).json({ chats: user.chats });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "Something went wrong" });
   }
 };

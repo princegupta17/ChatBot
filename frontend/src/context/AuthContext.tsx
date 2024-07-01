@@ -5,7 +5,12 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Userlogout, checkAuthStatus, loginUser } from "../helpers/api";
+import {
+  SignupUser,
+  Userlogout,
+  checkAuthStatus,
+  loginUser,
+} from "../helpers/api";
 
 type User = {
   name: string;
@@ -36,7 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     checkStatus();
-  });
+  }, [setUser]);
 
   const login = async (email: string, password: string) => {
     const data = await loginUser(email, password);
@@ -45,7 +50,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoggedIn(true);
     }
   };
-  const signup = async (name: string, email: string, password: string) => {};
+  const signup = async (name: string, email: string, password: string) => {
+    const data = await SignupUser(name, email, password);
+    if (data) {
+      setUser({ email: data.email, name: data.name });
+      setIsLoggedIn(true);
+    }
+  };
   const logout = async () => {
     await Userlogout();
     setIsLoggedIn(false);

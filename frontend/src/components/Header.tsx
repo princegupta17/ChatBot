@@ -12,17 +12,16 @@ function Header() {
       <Toolbar sx={{ display: "flex" }}>
         <Logo />
         <div>
-          \
           {auth?.isLoggedIn ? (
             <>
               <NavigationLink
-                bg="00fffc"
+                bg="#00fffc"
                 to="/chat"
                 text="Go to chat"
                 textColor="black"
               />
               <NavigationLink
-                bg="51538f"
+                bg="#51538f"
                 to="/"
                 text="Logout"
                 textColor="white"
@@ -32,13 +31,13 @@ function Header() {
           ) : (
             <>
               <NavigationLink
-                bg="00fffc"
+                bg="#00fffc"
                 to="/login"
                 text="Login"
                 textColor="black"
               />
               <NavigationLink
-                bg="51538f"
+                bg="#51538f"
                 to="/signup"
                 text="Signup"
                 textColor="white"
