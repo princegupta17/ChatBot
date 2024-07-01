@@ -6,7 +6,7 @@ import { coldarkDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 function extractfromString(message: string) {
   if (message.includes("```")) {
     const blocks = message.split("```");
-    return code;
+    return blocks;
   }
 }
 

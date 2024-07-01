@@ -124,3 +124,32 @@ export const verifyUser = async (
     res.status(404).json({ message: "ERROR", cause: error.message });
   }
 };
+
+export const logoutUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = await User.findById(res.locals.jwtData.id);
+    if (!user) {
+      return res.status(401).send("User not registered or token malfunction");
+    }
+
+    if (user._id.toString() !== res.locals.jwtData.id) {
+      return res.status(401).send("Permission didn't match");
+    }
+
+    res.clearCookie("auth_token", {
+      path: "/",
+      domain: "localhost",
+      httpOnly: true,
+      signed: true,
+    });
+
+    return res.status(201).json({ message: "Ok" });
+  } catch (error) {
+    console.log(error);
+    res.status(404).json({ message: "ERROR", cause: error.message });
+  }
+};

@@ -3,8 +3,10 @@ import { useAuth } from "../context/AuthContext";
 import { red } from "@mui/material/colors";
 import ChatItem from "../components/chat/ChatItem";
 import { IoMdSend } from "react-icons/io";
-import { useRef, useState } from "react";
-import { sendChatRequest } from "../helpers/api";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { deleteUserChat, getUserChat, sendChatRequest } from "../helpers/api";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 type Message = {
   role: "user" | "assistant";
@@ -12,6 +14,7 @@ type Message = {
 };
 
 function Chat() {
+  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [chatMessages, setchatMessages] = useState<Message[]>([]);
   const auth = useAuth();
@@ -25,6 +28,39 @@ function Chat() {
     const chatData = await sendChatRequest(content);
     setchatMessages([...chatData.chats]);
   };
+
+  const handledeleteChat = async () => {
+    try {
+      toast.loading("deleting chats", { id: "deletechat" });
+      await deleteUserChat();
+      setchatMessages([]);
+      toast.success("Successfully deleted chats", { id: "deletechat" });
+    } catch (error) {
+      console.log(error);
+      toast.error("deleting chats failed", { id: "deletechat" });
+    }
+  };
+
+  useLayoutEffect(() => {
+    if (auth?.isLoggedIn && auth.user) {
+      toast.loading("Loading chats", { id: "loadchats" });
+      getUserChat()
+        .then((data) => {
+          setchatMessages([...data.chats]);
+          toast.success("Successfully loaded chats", { id: "loadchats" });
+        })
+        .catch((err) => {
+          console.log(err);
+          toast.error("Loading failed", { id: "loadchats" });
+        });
+    }
+  }, [auth]);
+
+  useEffect(() => {
+    if (!auth?.user) {
+      return navigate("/login");
+    }
+  }, [auth]);
   return (
     <Box
       sx={{
@@ -76,6 +112,7 @@ function Chat() {
             education, etc. But avoid sharing personal information
           </Typography>
           <Button
+            onClick={handledeleteChat}
             sx={{
               width: "200px",
               my: "auto",
